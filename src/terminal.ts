@@ -43,9 +43,11 @@ export function renderTerminal(fp: Footprint): string {
   for (const r of fp.repos) {
     const name = r.name.length > nameW ? r.name.slice(0, nameW - 1) + "…" : r.name.padEnd(nameW);
     const churn = pc.green("+" + r.added) + " " + pc.red("-" + r.deleted);
+    const cost = fp.usage?.byRepo.get(r.name);
+    const costStr = cost ? "  " + pc.magenta("$" + cost.toFixed(0)) : "";
     lines.push(
       `  ${pc.bold(name)}  ${pc.cyan(bar(r.commits.length, maxCommits))} ` +
-        `${pc.cyan(String(r.commits.length).padStart(2))} ${pc.dim("commits")}  ${churn}`,
+        `${pc.cyan(String(r.commits.length).padStart(2))} ${pc.dim("commits")}  ${churn}${costStr}`,
     );
   }
 

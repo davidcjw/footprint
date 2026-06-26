@@ -31,22 +31,27 @@ function statBlock(value: string, label: string, color: string) {
   ]);
 }
 
-function repoRow(r: RepoSummary, maxCommits: number, color: string) {
+function repoRow(r: RepoSummary, maxCommits: number, color: string, cost?: number) {
   const pct = maxCommits > 0 ? Math.max(6, Math.round((r.commits.length / maxCommits) * 100)) : 6;
-  const name = r.name.length > 26 ? r.name.slice(0, 25) + "…" : r.name;
+  const name = r.name.length > 24 ? r.name.slice(0, 23) + "…" : r.name;
   return h("div", { display: "flex", alignItems: "center", marginBottom: 14 }, [
-    h("div", { width: 270, fontSize: 22, fontWeight: 600, color: "#e2e8f0", overflow: "hidden" }, name),
+    h("div", { width: 240, fontSize: 22, fontWeight: 600, color: "#e2e8f0", overflow: "hidden" }, name),
     h(
       "div",
       { display: "flex", flex: 1, height: 22, background: "#1e293b", borderRadius: 6, overflow: "hidden", marginRight: 16 },
       [h("div", { width: `${pct}%`, height: "100%", background: color, borderRadius: 6 })],
     ),
-    h("div", { width: 60, fontSize: 20, fontWeight: 700, color: "#cbd5e1", textAlign: "right" }, String(r.commits.length)),
-    h("div", { width: 150, fontSize: 18, fontWeight: 600, textAlign: "right", display: "flex", justifyContent: "flex-end" }, [
+    h("div", { width: 50, fontSize: 20, fontWeight: 700, color: "#cbd5e1", textAlign: "right" }, String(r.commits.length)),
+    h("div", { width: 138, fontSize: 18, fontWeight: 600, textAlign: "right", display: "flex", justifyContent: "flex-end" }, [
       h("span", { color: "#34d399" }, `+${r.added}`),
       h("span", { color: "#64748b", margin: "0 6px" }, "/"),
       h("span", { color: "#f87171" }, `-${r.deleted}`),
     ]),
+    h(
+      "div",
+      { width: 80, marginLeft: 14, fontSize: 18, fontWeight: 700, textAlign: "right", color: cost ? "#a78bfa" : "#334155" },
+      cost ? `$${cost.toFixed(0)}` : "·",
+    ),
   ]);
 }
 
@@ -150,11 +155,18 @@ function buildTree(fp: Footprint): Node {
         statBlock(`-${fp.totalDeleted.toLocaleString()}`, "deleted", "#f87171"),
       ],
     ),
+    // column header
+    h("div", { display: "flex", alignItems: "center", marginBottom: 10, fontSize: 13, fontWeight: 700, letterSpacing: 1, color: "#475569" }, [
+      h("div", { flex: 1 }, "REPO"),
+      h("div", { width: 50, textAlign: "right" }, "CMT"),
+      h("div", { width: 138, textAlign: "right" }, "LINES"),
+      h("div", { width: 80, marginLeft: 14, textAlign: "right" }, "AI $"),
+    ]),
     // repo rows
     h(
       "div",
       { display: "flex", flexDirection: "column" },
-      shown.map((r, i) => repoRow(r, maxCommits, PALETTE[i % PALETTE.length])),
+      shown.map((r, i) => repoRow(r, maxCommits, PALETTE[i % PALETTE.length], fp.usage?.byRepo.get(r.name))),
     ),
   ];
 
