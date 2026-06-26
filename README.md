@@ -1,5 +1,9 @@
 # footprint
 
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178c6.svg?logo=typescript&logoColor=white)
+
 Summarize the commits you authored **today** across all your local repos — as a
 clean terminal report and a shareable PNG card.
 
@@ -7,6 +11,19 @@ clean terminal report and a shareable PNG card.
 > Slack/Twitter/standup, or pipe the terminal output anywhere.
 
 ![example card](docs/example.png)
+
+## Contents
+
+- [What it does](#what-it-does)
+- [Usage](#usage)
+- [Monthly view](#monthly-view)
+- [Options](#options)
+- [Token cost tracking](#token-cost-tracking)
+- [How "today" is decided](#how-today-is-decided)
+- [Notes](#notes)
+- [Contributing](#contributing)
+- [Code of Conduct](#code-of-conduct)
+- [License](#license)
 
 ## What it does
 
@@ -21,6 +38,8 @@ No services, no API keys, no headless Chrome — the card is rendered with
 [`satori`](https://github.com/vercel/satori) + [`@resvg/resvg-js`](https://github.com/yisibl/resvg-js).
 
 ## Usage
+
+Requires **Node.js ≥ 20**.
 
 ```bash
 npm install
@@ -43,6 +62,8 @@ swaps in a **COMMITS / DAY** bar strip (one bar per day of the month) and the
 title becomes "Monthly Footprint"; everything else — repo table, per-repo AI $,
 language chips, Claude usage band — works the same over the month's window.
 Monthly cards are written as `footprint-month-<YYYY-MM>.png`.
+
+![example monthly card](docs/example-month.png)
 
 Or install the CLI globally:
 
@@ -92,6 +113,22 @@ see in your git history — not when changes happened to be pushed.
 - Merge commits are excluded.
 - Bundled font: Inter (SIL Open Font License), in `assets/`.
 
+## Contributing
+
+Contributions are welcome! Please open an issue first to discuss what you'd like to change.
+
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feature/your-feature`)
+3. Commit your changes (`git commit -m 'feat: describe change'`)
+4. Push and open a pull request
+
+Please run `npx tsc --noEmit` and make sure the type check passes before submitting a PR.
+
+## Code of Conduct
+
+This project follows the [Contributor Covenant v2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/).
+By participating you agree to uphold a welcoming, harassment-free environment.
+
 ## License
 
-MIT
+Distributed under the MIT License. See [LICENSE](LICENSE) for details.

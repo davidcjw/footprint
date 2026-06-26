@@ -2,6 +2,7 @@
   "name": "footprint",
   "version": "0.1.0",
   "description": "Summarize the commits you authored today across all your repos, as a terminal report and a shareable PNG card.",
+  "license": "MIT",
   "type": "module",
   "bin": {
     "footprint": "./bin/footprint.mjs"
