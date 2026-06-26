@@ -174,6 +174,19 @@ function buildTree(fp: Footprint): Node {
     children.push(h("div", { fontSize: 18, color: "#64748b", marginTop: 4, fontWeight: 600 }, `+ ${moreRepos} more repos`));
   }
 
+  if (fp.usage && fp.usage.totalCost > 0) {
+    const shownCost = shown.reduce((s, r) => s + (fp.usage!.byRepo.get(r.name) ?? 0), 0);
+    const other = fp.usage.totalCost - shownCost;
+    if (other >= 0.5) {
+      children.push(
+        h("div", { display: "flex", alignItems: "center", marginTop: 10, paddingTop: 10, borderTop: "1px solid #1e293b" }, [
+          h("div", { flex: 1, fontSize: 18, color: "#64748b", fontWeight: 600 }, "other repos · non-repo dirs"),
+          h("div", { width: 80, marginLeft: 14, fontSize: 18, fontWeight: 700, textAlign: "right", color: "#a78bfa" }, `$${other.toFixed(0)}`),
+        ]),
+      );
+    }
+  }
+
   if (fp.languages.length) {
     children.push(
       h(

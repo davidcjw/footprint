@@ -51,6 +51,14 @@ export function renderTerminal(fp: Footprint): string {
     );
   }
 
+  if (fp.usage && fp.usage.totalCost > 0) {
+    const shownCost = fp.repos.reduce((s, r) => s + (fp.usage!.byRepo.get(r.name) ?? 0), 0);
+    const other = fp.usage.totalCost - shownCost;
+    if (other >= 0.5) {
+      lines.push(`  ${pc.dim("other repos · non-repo dirs".padEnd(nameW + 23))}${pc.magenta("$" + other.toFixed(0))}`);
+    }
+  }
+
   if (fp.languages.length) {
     lines.push(rule);
     const langs = fp.languages
