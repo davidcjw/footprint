@@ -1,11 +1,12 @@
 import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { parseArgs } from "./config.js";
 import { findRepos, scan } from "./git.js";
 import { scanUsage } from "./usage.js";
 import { renderTerminal } from "./terminal.js";
 import { renderCard } from "./card.js";
+import { toJson } from "./json.js";
 
 async function main() {
   const cfg = parseArgs(process.argv);
@@ -35,7 +36,20 @@ async function main() {
     });
   }
 
+  // Bare --json: emit pure JSON to stdout and stop (pipeable, no terminal/card noise).
+  if (cfg.json === "-") {
+    process.stdout.write(toJson(fp) + "\n");
+    return;
+  }
+
   process.stdout.write(renderTerminal(fp));
+
+  // --json <file>: write the export alongside the normal terminal/card output.
+  if (cfg.json) {
+    mkdirSync(dirname(cfg.json), { recursive: true });
+    writeFileSync(cfg.json, toJson(fp) + "\n");
+    console.log(`  📄 json → ${cfg.json}\n`);
+  }
 
   const hasUsage = !!fp.usage && fp.usage.messages > 0;
   if (cfg.noCard || (fp.repos.length === 0 && !hasUsage)) return;

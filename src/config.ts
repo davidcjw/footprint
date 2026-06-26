@@ -13,6 +13,8 @@ export interface CliConfig {
   noCard: boolean;
   open: boolean;
   noUsage: boolean;
+  /** null = no JSON; "-" = stdout (pure, suppresses terminal + card); else a file path. */
+  json: string | null;
   claudeDir: string;
   period: "day" | "month";
   daysInMonth: number; // number of days in the period (1 for a day)
@@ -68,6 +70,7 @@ export function parseArgs(argv: string[]): CliConfig {
   let noCard = false;
   let open = false;
   let noUsage = false;
+  let json: string | null = null;
   let claudeDir = join(homedir(), ".claude");
 
   for (let i = 0; i < args.length; i++) {
@@ -88,7 +91,16 @@ export function parseArgs(argv: string[]): CliConfig {
     else if (a === "--no-card") noCard = true;
     else if (a === "--open") open = true;
     else if (a === "--no-usage") noUsage = true;
-    else if (a === "--claude-dir") claudeDir = args[++i];
+    else if (a === "--json") {
+      // Optional value: --json out.json writes a file; bare --json prints to stdout.
+      const next = args[i + 1];
+      if (next && !next.startsWith("-")) {
+        json = next;
+        i++;
+      } else {
+        json = "-";
+      }
+    } else if (a === "--claude-dir") claudeDir = args[++i];
     else if (a === "--help" || a === "-h") {
       printHelp();
       process.exit(0);
@@ -97,7 +109,7 @@ export function parseArgs(argv: string[]): CliConfig {
 
   if (authors.length === 0) authors.push(...defaultAuthors());
 
-  const common = { root, authors, outDir, noCard, open, noUsage, claudeDir };
+  const common = { root, authors, outDir, noCard, open, noUsage, json, claudeDir };
 
   if (monthStr) {
     const base = monthStr === "current" ? new Date() : new Date(`${monthStr}-15T12:00:00`);
@@ -146,6 +158,7 @@ Options:
   --no-card        Skip PNG rendering, terminal only
   --open           Open the PNG after rendering (macOS)
   --no-usage       Skip Claude Code token/cost tracking
+  --json [file]    Emit structured JSON; bare flag prints to stdout (pipeable)
   --claude-dir <d> Claude Code data dir                 (default: ~/.claude)
   -h, --help       Show this help
 `);

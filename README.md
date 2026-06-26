@@ -19,6 +19,7 @@ clean terminal report and a shareable PNG card.
 - [Monthly view](#monthly-view)
 - [Options](#options)
 - [Token cost tracking](#token-cost-tracking)
+- [JSON export](#json-export)
 - [How "today" is decided](#how-today-is-decided)
 - [Notes](#notes)
 - [Contributing](#contributing)
@@ -86,6 +87,7 @@ The card is written to `./out/footprint-<date>.png`.
 | `--no-card` | — | Terminal summary only, skip rendering |
 | `--open` | — | Open the PNG after rendering (macOS) |
 | `--no-usage` | — | Skip Claude Code token/cost tracking |
+| `--json [file]` | — | Emit structured JSON. Bare flag → stdout (pipeable); with a path → write that file alongside the normal output |
 | `--claude-dir <d>` | `~/.claude` | Claude Code data dir (where session transcripts live) |
 | `-h, --help` | — | Show help |
 
@@ -100,6 +102,24 @@ it per model:
 
 Models without a known price are still counted (tokens) and flagged `(unpriced)`
 with `$0`. Pricing lives in `src/pricing.ts` — update it when rates change.
+
+## JSON export
+
+`--json` emits the same data the card and terminal report are built from, as
+structured JSON — so you can pipe a day or month into `jq`, a notebook, Datasette,
+Grafana, or whatever you already use.
+
+```bash
+# pure JSON to stdout (no terminal report, no card) — pipe it anywhere
+footprint --month --json | jq '.usage.byRepo'
+
+# write a file and keep the normal terminal output
+footprint --json out/footprint.json
+```
+
+The shape is stable and versioned (`schemaVersion`). Top-level keys: `date`,
+`period`, `authors`, `totals`, `languages`, `repos[]` (each with its `commits[]`),
+`activity[]` (month only), and `usage` (totals, `byModel[]`, and `byRepo[]`).
 
 ## How "today" is decided
 
