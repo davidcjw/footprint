@@ -1,0 +1,63 @@
+import pc from "picocolors";
+import type { Footprint } from "./types.js";
+
+function bar(value: number, max: number, width = 18): string {
+  if (max <= 0) return "";
+  const filled = Math.max(1, Math.round((value / max) * width));
+  return "█".repeat(filled) + "░".repeat(Math.max(0, width - filled));
+}
+
+export function renderTerminal(fp: Footprint): string {
+  const lines: string[] = [];
+  const rule = pc.dim("─".repeat(52));
+
+  lines.push("");
+  lines.push(pc.bold(pc.cyan("  ⚡ Daily Footprint  ")) + pc.dim("· " + fp.dateLabel));
+  lines.push(rule);
+
+  if (fp.repos.length === 0) {
+    lines.push(pc.dim(`  No commits by ${fp.authors.join(", ")} on ${fp.date}.`));
+    lines.push(rule);
+    lines.push("");
+    return lines.join("\n");
+  }
+
+  // headline stats
+  const stat = (label: string, val: string, color: (s: string) => string) =>
+    `${color(pc.bold(val))} ${pc.dim(label)}`;
+  lines.push(
+    "  " +
+      [
+        stat("repos", String(fp.repos.length), pc.white),
+        stat("commits", String(fp.totalCommits), pc.cyan),
+        stat("added", "+" + fp.totalAdded.toLocaleString(), pc.green),
+        stat("deleted", "-" + fp.totalDeleted.toLocaleString(), pc.red),
+      ].join(pc.dim("   ")),
+  );
+  lines.push(rule);
+
+  const maxCommits = Math.max(...fp.repos.map((r) => r.commits.length));
+  const nameW = Math.min(22, Math.max(...fp.repos.map((r) => r.name.length)));
+
+  for (const r of fp.repos) {
+    const name = r.name.length > nameW ? r.name.slice(0, nameW - 1) + "…" : r.name.padEnd(nameW);
+    const churn = pc.green("+" + r.added) + " " + pc.red("-" + r.deleted);
+    lines.push(
+      `  ${pc.bold(name)}  ${pc.cyan(bar(r.commits.length, maxCommits))} ` +
+        `${pc.cyan(String(r.commits.length).padStart(2))} ${pc.dim("commits")}  ${churn}`,
+    );
+  }
+
+  if (fp.languages.length) {
+    lines.push(rule);
+    const langs = fp.languages
+      .slice(0, 6)
+      .map((l) => `${pc.bold("." + l.ext)} ${pc.dim(l.changes.toLocaleString())}`)
+      .join("   ");
+    lines.push("  " + pc.dim("langs ") + langs);
+  }
+
+  lines.push(rule);
+  lines.push("");
+  return lines.join("\n");
+}

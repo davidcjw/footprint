@@ -1,0 +1,27 @@
+{
+  "name": "footprint",
+  "version": "0.1.0",
+  "description": "Summarize the commits you authored today across all your repos, as a terminal report and a shareable PNG card.",
+  "type": "module",
+  "bin": {
+    "footprint": "./bin/footprint.mjs"
+  },
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "footprint": "tsx src/index.ts"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "picocolors": "^1.1.1",
+    "satori": "^0.12.1"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "@types/node": "^22.10.0"
+  }
+}
