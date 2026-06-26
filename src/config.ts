@@ -14,12 +14,27 @@ export interface CliConfig {
   open: boolean;
 }
 
-function gitGlobalEmail(): string | null {
+function gitConfig(key: string): string | null {
   try {
-    return execFileSync("git", ["config", "--global", "user.email"], { encoding: "utf8" }).trim() || null;
+    return execFileSync("git", ["config", "--global", key], { encoding: "utf8" }).trim() || null;
   } catch {
     return null;
   }
+}
+
+/**
+ * Default author matchers. We include the global user.name as well as user.email
+ * because the same person often commits under multiple emails (e.g. a GitHub
+ * `…@users.noreply.github.com` address). git --author is a regex matched against
+ * "Name <email>", so the name catches every identity sharing that name.
+ */
+function defaultAuthors(): string[] {
+  const out: string[] = [];
+  const name = gitConfig("user.name");
+  const email = gitConfig("user.email");
+  if (name) out.push(name);
+  if (email) out.push(email);
+  return [...new Set(out)];
 }
 
 function pad(n: number): string {
@@ -58,10 +73,7 @@ export function parseArgs(argv: string[]): CliConfig {
     }
   }
 
-  if (authors.length === 0) {
-    const email = gitGlobalEmail();
-    if (email) authors.push(email);
-  }
+  if (authors.length === 0) authors.push(...defaultAuthors());
 
   // Resolve the target local day -> [since, until) covering that whole day.
   const base = dateStr ? new Date(`${dateStr}T12:00:00`) : new Date();
