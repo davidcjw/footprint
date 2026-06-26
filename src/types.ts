@@ -24,4 +24,6 @@ export interface Footprint {
   totalDeleted: number;
   /** file-extension -> lines changed, top languages */
   languages: { ext: string; changes: number }[];
+  /** Claude Code token usage + cost for the day, when available */
+  usage?: import("./usage.js").UsageSummary;
 }

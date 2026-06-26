@@ -18,6 +18,7 @@ export function renderTerminal(fp: Footprint): string {
   if (fp.repos.length === 0) {
     lines.push(pc.dim(`  No commits by ${fp.authors.join(", ")} on ${fp.date}.`));
     lines.push(rule);
+    renderUsage(fp, lines, rule);
     lines.push("");
     return lines.join("\n");
   }
@@ -58,6 +59,45 @@ export function renderTerminal(fp: Footprint): string {
   }
 
   lines.push(rule);
+  renderUsage(fp, lines, rule);
   lines.push("");
   return lines.join("\n");
+}
+
+function fmtTokens(n: number): string {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
+  if (n >= 1_000) return (n / 1_000).toFixed(1) + "k";
+  return String(n);
+}
+
+function renderUsage(fp: Footprint, lines: string[], rule: string): void {
+  const u = fp.usage;
+  if (!u || u.messages === 0) return;
+
+  lines.push(
+    "  " +
+      pc.bold(pc.magenta("🤖 Claude usage")) +
+      "  " +
+      pc.green(pc.bold("$" + u.totalCost.toFixed(2))) +
+      pc.dim("  · ") +
+      pc.dim(`${u.messages.toLocaleString()} msgs`),
+  );
+  lines.push(
+    "  " +
+      pc.dim("tokens ") +
+      `${pc.cyan(fmtTokens(u.inputTokens))} ${pc.dim("in")}  ` +
+      `${pc.cyan(fmtTokens(u.outputTokens))} ${pc.dim("out")}  ` +
+      `${pc.dim(fmtTokens(u.cacheReadTokens) + " cache-read")}  ` +
+      `${pc.dim(fmtTokens(u.cacheWriteTokens) + " cache-write")}`,
+  );
+  for (const m of u.byModel.slice(0, 4)) {
+    const label = m.model.replace(/^claude-/, "");
+    const note = m.priced ? "" : pc.yellow(" (unpriced)");
+    lines.push(
+      `  ${pc.dim("•")} ${pc.bold(label.padEnd(14))} ${pc.green("$" + m.cost.toFixed(2)).padStart(8)} ` +
+        pc.dim(`  ${fmtTokens(m.input)}/${fmtTokens(m.output)} io`) +
+        note,
+    );
+  }
+  lines.push(rule);
 }

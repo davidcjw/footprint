@@ -2,7 +2,8 @@ import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "./config.js";
-import { scan } from "./git.js";
+import { findRepos, scan } from "./git.js";
+import { scanUsage } from "./usage.js";
 import { renderTerminal } from "./terminal.js";
 import { renderCard } from "./card.js";
 
@@ -23,9 +24,19 @@ async function main() {
     dateLabel: cfg.dateLabel,
   });
 
+  if (!cfg.noUsage) {
+    fp.usage = scanUsage({
+      claudeDir: cfg.claudeDir,
+      since: cfg.since,
+      until: cfg.until,
+      repoPaths: findRepos(cfg.root),
+    });
+  }
+
   process.stdout.write(renderTerminal(fp));
 
-  if (cfg.noCard || fp.repos.length === 0) return;
+  const hasUsage = !!fp.usage && fp.usage.messages > 0;
+  if (cfg.noCard || (fp.repos.length === 0 && !hasUsage)) return;
 
   try {
     const png = await renderCard(fp);

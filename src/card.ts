@@ -71,6 +71,57 @@ function langChip(ext: string, changes: number, color: string) {
   );
 }
 
+function fmtTokens(n: number): string {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
+  if (n >= 1_000) return (n / 1_000).toFixed(1) + "k";
+  return String(n);
+}
+
+function usageBand(u: NonNullable<Footprint["usage"]>): Node {
+  const top = u.byModel.slice(0, 3);
+  return h(
+    "div",
+    {
+      display: "flex",
+      flexDirection: "column",
+      marginTop: 24,
+      background: "#170d2e",
+      border: "1px solid #3b2d6b",
+      borderRadius: 16,
+      padding: "22px 28px",
+    },
+    [
+      h("div", { display: "flex", justifyContent: "space-between", alignItems: "center" }, [
+        h("div", { display: "flex", alignItems: "center" }, [
+          h("div", { width: 8, height: 20, background: "#a78bfa", borderRadius: 3, marginRight: 12 }),
+          h("div", { fontSize: 20, color: "#c4b5fd", fontWeight: 700, letterSpacing: 1 }, "CLAUDE USAGE"),
+        ]),
+        h("div", { fontSize: 40, color: "#34d399", fontWeight: 700 }, `$${u.totalCost.toFixed(2)}`),
+      ]),
+      h("div", { display: "flex", marginTop: 14 }, [
+        h("div", { fontSize: 18, color: "#94a3b8", marginRight: 20 }, `${fmtTokens(u.inputTokens)} in`),
+        h("div", { fontSize: 18, color: "#94a3b8", marginRight: 20 }, `${fmtTokens(u.outputTokens)} out`),
+        h("div", { fontSize: 18, color: "#64748b", marginRight: 20 }, `${fmtTokens(u.cacheReadTokens)} cache-read`),
+        h("div", { fontSize: 18, color: "#64748b" }, `${u.messages.toLocaleString()} msgs`),
+      ]),
+      h(
+        "div",
+        { display: "flex", flexWrap: "wrap", marginTop: 8 },
+        top.map((m) =>
+          h(
+            "div",
+            { display: "flex", alignItems: "center", marginRight: 18, marginTop: 8, fontSize: 16 },
+            [
+              h("span", { color: "#e2e8f0", fontWeight: 600 }, m.model.replace(/^claude-/, "")),
+              h("span", { color: "#34d399", marginLeft: 8 }, `$${m.cost.toFixed(2)}`),
+            ],
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
 function buildTree(fp: Footprint): Node {
   const shown = fp.repos.slice(0, 10);
   const maxCommits = Math.max(1, ...shown.map((r) => r.commits.length));
@@ -119,6 +170,10 @@ function buildTree(fp: Footprint): Node {
         fp.languages.slice(0, 8).map((l, i) => langChip(l.ext, l.changes, PALETTE[i % PALETTE.length])),
       ),
     );
+  }
+
+  if (fp.usage && fp.usage.messages > 0) {
+    children.push(usageBand(fp.usage));
   }
 
   children.push(

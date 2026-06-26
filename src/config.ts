@@ -12,6 +12,8 @@ export interface CliConfig {
   outDir: string;
   noCard: boolean;
   open: boolean;
+  noUsage: boolean;
+  claudeDir: string;
 }
 
 function gitConfig(key: string): string | null {
@@ -58,6 +60,8 @@ export function parseArgs(argv: string[]): CliConfig {
   let outDir = join(process.cwd(), "out");
   let noCard = false;
   let open = false;
+  let noUsage = false;
+  let claudeDir = join(homedir(), ".claude");
 
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
@@ -67,6 +71,8 @@ export function parseArgs(argv: string[]): CliConfig {
     else if (a === "--out") outDir = args[++i];
     else if (a === "--no-card") noCard = true;
     else if (a === "--open") open = true;
+    else if (a === "--no-usage") noUsage = true;
+    else if (a === "--claude-dir") claudeDir = args[++i];
     else if (a === "--help" || a === "-h") {
       printHelp();
       process.exit(0);
@@ -90,6 +96,8 @@ export function parseArgs(argv: string[]): CliConfig {
     outDir,
     noCard,
     open,
+    noUsage,
+    claudeDir,
   };
 }
 
@@ -106,6 +114,8 @@ Options:
   --out <dir>      Where to write the PNG card          (default: ./out)
   --no-card        Skip PNG rendering, terminal only
   --open           Open the PNG after rendering (macOS)
+  --no-usage       Skip Claude Code token/cost tracking
+  --claude-dir <d> Claude Code data dir                 (default: ~/.claude)
   -h, --help       Show this help
 `);
 }

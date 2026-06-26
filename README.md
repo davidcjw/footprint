@@ -11,8 +11,10 @@ clean terminal report and a shareable PNG card.
 ## What it does
 
 - Scans every git repo directly under a root folder (default `~/code`).
-- Finds commits **you** authored on a given local day (matched by your git email).
+- Finds commits **you** authored on a given local day (matched by your git name/email).
 - Aggregates: repos touched, commit counts, lines added/deleted, top languages.
+- Tracks **Claude Code token usage and $ cost** for the day from local session
+  transcripts (`~/.claude`), broken down by model.
 - Prints a colored terminal summary **and** renders a PNG "footprint card".
 
 No services, no API keys, no headless Chrome — the card is rendered with
@@ -49,7 +51,21 @@ The card is written to `./out/footprint-<date>.png`.
 | `--out <dir>` | `./out` | Where to write the PNG card |
 | `--no-card` | — | Terminal summary only, skip rendering |
 | `--open` | — | Open the PNG after rendering (macOS) |
+| `--no-usage` | — | Skip Claude Code token/cost tracking |
+| `--claude-dir <d>` | `~/.claude` | Claude Code data dir (where session transcripts live) |
 | `-h, --help` | — | Show help |
+
+## Token cost tracking
+
+footprint reads Claude Code's local session transcripts (`~/.claude/projects/**/*.jsonl`),
+sums the `usage` of every assistant message authored on the target day, and prices
+it per model:
+
+- input / output tokens at each model's published per-MTok rate
+- cache **reads** at 0.1×, 5-min cache **writes** at 1.25×, 1-hour writes at 2× the input rate
+
+Models without a known price are still counted (tokens) and flagged `(unpriced)`
+with `$0`. Pricing lives in `src/pricing.ts` — update it when rates change.
 
 ## How "today" is decided
 
