@@ -22,6 +22,8 @@ async function main() {
     until: cfg.until,
     date: cfg.date,
     dateLabel: cfg.dateLabel,
+    period: cfg.period,
+    daysInMonth: cfg.daysInMonth,
   });
 
   if (!cfg.noUsage) {
@@ -41,7 +43,8 @@ async function main() {
   try {
     const png = await renderCard(fp);
     mkdirSync(cfg.outDir, { recursive: true });
-    const file = join(cfg.outDir, `footprint-${fp.date}.png`);
+    const prefix = cfg.period === "month" ? "footprint-month" : "footprint";
+    const file = join(cfg.outDir, `${prefix}-${fp.date}.png`);
     writeFileSync(file, png);
     console.log(`  🖼  card → ${file}\n`);
     if (cfg.open) {

@@ -11,16 +11,23 @@ export function renderTerminal(fp: Footprint): string {
   const lines: string[] = [];
   const rule = pc.dim("─".repeat(52));
 
+  const title = fp.period === "month" ? "📅 Monthly Footprint  " : "⚡ Daily Footprint  ";
   lines.push("");
-  lines.push(pc.bold(pc.cyan("  ⚡ Daily Footprint  ")) + pc.dim("· " + fp.dateLabel));
+  lines.push(pc.bold(pc.cyan("  " + title)) + pc.dim("· " + fp.dateLabel));
   lines.push(rule);
 
   if (fp.repos.length === 0) {
-    lines.push(pc.dim(`  No commits by ${fp.authors.join(", ")} on ${fp.date}.`));
+    const when = fp.period === "month" ? `in ${fp.dateLabel}` : `on ${fp.date}`;
+    lines.push(pc.dim(`  No commits by ${fp.authors.join(", ")} ${when}.`));
     lines.push(rule);
     renderUsage(fp, lines, rule);
     lines.push("");
     return lines.join("\n");
+  }
+
+  if (fp.period === "month" && fp.activity) {
+    renderActivity(fp.activity, lines);
+    lines.push(rule);
   }
 
   // headline stats
@@ -72,6 +79,29 @@ export function renderTerminal(fp: Footprint): string {
   renderUsage(fp, lines, rule);
   lines.push("");
   return lines.join("\n");
+}
+
+const SPARK = "▁▂▃▄▅▆▇█";
+
+function renderActivity(activity: number[], lines: string[]): void {
+  const max = Math.max(1, ...activity);
+  const spark = activity
+    .map((n) => {
+      if (n === 0) return pc.dim("·");
+      const idx = Math.min(SPARK.length - 1, Math.ceil((n / max) * SPARK.length) - 1);
+      return pc.cyan(SPARK[idx]);
+    })
+    .join("");
+  const activeDays = activity.filter((n) => n > 0).length;
+  let bestDay = 0;
+  activity.forEach((n, i) => {
+    if (n > activity[bestDay]) bestDay = i;
+  });
+  lines.push("  " + pc.dim("commits/day ") + spark);
+  lines.push(
+    "  " +
+      pc.dim(`${activeDays} active days · busiest day ${bestDay + 1} (${activity[bestDay]} commits)`),
+  );
 }
 
 function fmtTokens(n: number): string {

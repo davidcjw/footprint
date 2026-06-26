@@ -30,7 +30,19 @@ npm run footprint
 
 # a specific day, open the card when done
 npm run footprint -- --date 2026-06-25 --open
+
+# whole month (current month, or a specific one)
+npm run footprint -- --month
+npm run footprint -- --month 2026-06
 ```
+
+### Monthly view
+
+`--month` aggregates the whole calendar month instead of a single day. The card
+swaps in a **COMMITS / DAY** bar strip (one bar per day of the month) and the
+title becomes "Monthly Footprint"; everything else — repo table, per-repo AI $,
+language chips, Claude usage band — works the same over the month's window.
+Monthly cards are written as `footprint-month-<YYYY-MM>.png`.
 
 Or install the CLI globally:
 
@@ -48,6 +60,7 @@ The card is written to `./out/footprint-<date>.png`.
 | `--root <dir>` | `~/code` | Folder containing your repos (immediate children) |
 | `--author <s>` | git global `user.email` | Match author name/email. Repeatable (OR-ed) |
 | `--date <YMD>` | today (local) | Target day, e.g. `2026-06-25` |
+| `--month [YM]` | — | Whole month, e.g. `2026-06`; bare `--month` = current month |
 | `--out <dir>` | `./out` | Where to write the PNG card |
 | `--no-card` | — | Terminal summary only, skip rendering |
 | `--open` | — | Open the PNG after rendering (macOS) |

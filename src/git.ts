@@ -114,6 +114,8 @@ export interface ScanOptions {
   until: string;
   date: string;
   dateLabel: string;
+  period: "day" | "month";
+  daysInMonth: number;
 }
 
 export function scan(opts: ScanOptions): Footprint {
@@ -139,6 +141,20 @@ export function scan(opts: ScanOptions): Footprint {
     .map(([ext, changes]) => ({ ext, changes }))
     .sort((a, b) => b.changes - a.changes);
 
+  // For the month view, bucket commits by day-of-month using the author-date's
+  // own calendar day (the YYYY-MM-DD prefix of %aI), so it reflects the day you
+  // committed regardless of the runner's timezone.
+  let activity: number[] | undefined;
+  if (opts.period === "month") {
+    activity = new Array(opts.daysInMonth).fill(0);
+    for (const r of summaries) {
+      for (const c of r.commits) {
+        const day = parseInt(c.date.slice(8, 10), 10);
+        if (day >= 1 && day <= opts.daysInMonth) activity[day - 1]++;
+      }
+    }
+  }
+
   return {
     date: opts.date,
     dateLabel: opts.dateLabel,
@@ -148,5 +164,7 @@ export function scan(opts: ScanOptions): Footprint {
     totalAdded: summaries.reduce((s, r) => s + r.added, 0),
     totalDeleted: summaries.reduce((s, r) => s + r.deleted, 0),
     languages,
+    period: opts.period,
+    activity,
   };
 }

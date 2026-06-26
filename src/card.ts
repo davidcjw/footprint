@@ -82,6 +82,29 @@ function fmtTokens(n: number): string {
   return String(n);
 }
 
+// A per-day commit bar strip for the month view.
+function activityStrip(activity: number[]): Node {
+  const max = Math.max(1, ...activity);
+  const H = 56;
+  const bars = activity.map((n, i) =>
+    h(
+      "div",
+      { display: "flex", flex: 1, flexDirection: "column", justifyContent: "flex-end", alignItems: "stretch", height: H, marginRight: i === activity.length - 1 ? 0 : 3 },
+      [
+        h("div", {
+          height: Math.max(2, Math.round((n / max) * H)),
+          background: n === 0 ? "#1e293b" : "#22d3ee",
+          borderRadius: 2,
+        }),
+      ],
+    ),
+  );
+  return h("div", { display: "flex", flexDirection: "column", marginBottom: 26 }, [
+    h("div", { fontSize: 13, fontWeight: 700, letterSpacing: 1, color: "#475569", marginBottom: 8 }, "COMMITS / DAY"),
+    h("div", { display: "flex", alignItems: "flex-end" }, bars),
+  ]);
+}
+
 function usageBand(u: NonNullable<Footprint["usage"]>): Node {
   const top = u.byModel.slice(0, 3);
   return h(
@@ -138,7 +161,11 @@ function buildTree(fp: Footprint): Node {
       h("div", { display: "flex", flexDirection: "column" }, [
         h("div", { display: "flex", alignItems: "center" }, [
           h("div", { width: 8, height: 22, background: "#22d3ee", borderRadius: 3, marginRight: 12 }),
-          h("div", { fontSize: 22, color: "#22d3ee", fontWeight: 700, letterSpacing: 2 }, "DAILY FOOTPRINT"),
+          h(
+            "div",
+            { fontSize: 22, color: "#22d3ee", fontWeight: 700, letterSpacing: 2 },
+            fp.period === "month" ? "MONTHLY FOOTPRINT" : "DAILY FOOTPRINT",
+          ),
         ]),
         h("div", { fontSize: 40, color: "#f8fafc", fontWeight: 700, marginTop: 6 }, fp.dateLabel),
       ]),
@@ -155,6 +182,8 @@ function buildTree(fp: Footprint): Node {
         statBlock(`-${fp.totalDeleted.toLocaleString()}`, "deleted", "#f87171"),
       ],
     ),
+    // monthly activity strip
+    ...(fp.period === "month" && fp.activity ? [activityStrip(fp.activity)] : []),
     // column header
     h("div", { display: "flex", alignItems: "center", marginBottom: 10, fontSize: 13, fontWeight: 700, letterSpacing: 1, color: "#475569" }, [
       h("div", { flex: 1 }, "REPO"),
