@@ -10,7 +10,9 @@
   "scripts": {
     "start": "tsx src/index.ts",
     "build": "tsc -p tsconfig.json",
-    "footprint": "tsx src/index.ts"
+    "footprint": "tsx src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "engines": {
     "node": ">=20"
@@ -21,8 +23,9 @@
     "satori": "^0.12.1"
   },
   "devDependencies": {
+    "@types/node": "^22.10.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
-    "@types/node": "^22.10.0"
+    "vitest": "^4.1.9"
   }
 }

@@ -1,5 +1,6 @@
 # footprint
 
+[![CI](https://github.com/davidcjw/footprint/actions/workflows/ci.yml/badge.svg)](https://github.com/davidcjw/footprint/actions/workflows/ci.yml)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178c6.svg?logo=typescript&logoColor=white)
